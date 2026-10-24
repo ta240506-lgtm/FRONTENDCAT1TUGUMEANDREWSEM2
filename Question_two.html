@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <title>Campus Shuttle</title>
+    <style>
+    *{
+    box-sizing: border-box;
+    padding: 0;
+    margin: 0;
+}
+
+body{
+            font-family: Arial, Helvetica, sans-serif;
+            background-color: #f2f5f8;
+            margin: 0;
+            padding: 30px 16px;
+}
+.form-group{
+    margin-bottom: 14px;
+
+
+}
+ .registration-card{
+            max-width: 520px;
+            width: 500px;
+            height: 700px;
+            box-sizing: border-box;
+            padding: 44px 34px 30px;
+            margin: 40px auto;
+            border:  1px solid #777;
+            border-radius: 8px;
+            background-color: rgb(248, 205, 235);}
+label{
+    display: block;
+    font-weight: 600;
+    margin-bottom: 6px;
+}
+input, select, button{
+    width: 100%;
+    padding: 9px;
+    font: inherit;
+}
+button{
+        margin-top: 20px;
+        padding: 11px 16px;
+        width: 100%;
+        border: none;
+        border-radius: 4px;
+        background-color: #155e75;
+        color: white;
+        cursor: pointer;
+}
+.result{
+    margin-top: 18px;
+    padding: 15px;
+    border:none;
+    border-color: #2e2d32;
+    color: #1b5e20;
+}
+.result .error{
+    background: #ffebee;
+    color: #b71c1c;
+}
+.result .success{
+    background: #95f892;
+    color: #003805;
+}
+    </style>
+</head>
+<body>
+    
+    <main class="registration-card">
+        <h1>Campus Shuttle Fare and Boarding Pass Generator</h1>
+        <form id="shuttleForm">
+            <div class="form-group">
+                <label for="route">Route</label>
+                <select name="route" id="route" required>
+                    <option value="" disabled selected>Select Route</option>
+                    <option value="CAMPUS">CAMPUS - Main campus: UGX: 2000</option>
+                    <option value="CITY">CITY — City center: UGX: 3500</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="passengers">Number of Passengers</label>
+                <input type="number" id="passengers" min="1" max="10" step="1" placeholder="Enter numbers from 1 to 10" required>
+            </div>
+            <button type="submit">Boarding list</button>
+            <section id="shuttleResult" class="result"></section>
+        </form>
+    </main>
+    <script>
+const shuttleForm   = document.getElementById("shuttleForm");
+const shuttleResult = document.getElementById("shuttleResult");
+
+const fares = {
+    CAMPUS: 2000,
+    CITY:   3500
+};
+
+const Last_digit = 6; // Even number hence a 5% discount
+const Discount_rate     = 0.95;   // 5% off
+const GROUP_DISCOUNT_MIN = 5;
+
+shuttleForm.addEventListener("submit", function (event) {
+    event.preventDefault();
+
+    const rawPassengers = document.getElementById("passengers").value.trim();
+    const route         = document.getElementById("route").value.trim();
+
+    if (rawPassengers === "") {
+        showMessage("Enter passenger number");
+        return;
+    }
+
+    const passengers = Number(rawPassengers);
+
+    if (!Number.isFinite(passengers) ||
+        !Number.isInteger(passengers) ||
+        passengers < 1 ||
+        passengers > 10) {
+        showError("Passenger count must be a whole number between 1 and 10");
+        return;
+    }
+
+    if (!Object.prototype.hasOwnProperty.call(fares, route)) {
+        showError("Please choose a valid route (CAMPUS or CITY)");
+        return;
+    }
+
+
+    const baseFare        = fares[route];
+    const discountApplies = passengers > GROUP_DISCOUNT_MIN;
+    const farePerPassenger = discountApplies ? baseFare * Discount_rate  : baseFare;
+
+    const subTotal        = baseFare * passengers;
+    const total           = farePerPassenger * passengers;
+    const discountAmount  = subTotal - total;
+
+    let html  = `<h2>Boarding list - ${route}</h2>`;
+    html += `<p>Passengers: ${passengers}</p>`;
+    html += `<p>Fare per passenger: UGX ${Math.round(farePerPassenger).toLocaleString()}</p>`;
+    html += `<p>Subtotal: UGX ${subTotal.toLocaleString()}</p>`;
+
+    if (discountApplies) {
+        html += `<p>Group discount (5%): –UGX ${Math.round(discountAmount).toLocaleString()}</p>`;
+    }
+
+    html += `<ol><strong>Total: UGX ${Math.round(total).toLocaleString()}</strong></p>`;
+    html += `<tb>`;
+
+    for (let x = 1; x <= passengers; x++) {
+        html += `<li>Boarding pass ${x} – ${route} – UGX ${Math.round(farePerPassenger).toLocaleString()}</li>`;
+    }
+
+    html += `</ol>`;
+
+    shuttleResult.className = "result success";
+    shuttleResult.innerHTML = html;
+});
+
+function showError(message) {
+    shuttleResult.className = "result error";
+    shuttleResult.textContent = message;
+}
+
+    </script>
+</body>
+</html>

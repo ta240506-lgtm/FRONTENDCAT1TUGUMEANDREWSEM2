@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Workshop Registration</title>
+    <style>
+        *{
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body{
+            font-family: Arial, Helvetica, sans-serif;
+            background-color: #f2f5f8;
+            margin: 0;
+            padding: 30px 16px;
+        }
+        .registration-card{
+            max-width: 520px;
+            width: 500px;
+            height: 500px;
+            box-sizing: border-box;
+            padding: 44px 34px 34px;
+            margin: 40px auto;
+            border:  1px solid #777;
+            border-radius: 8px;
+            background-color: rgb(240, 194, 194);
+        
+        }
+        h1{
+            text-align: center;
+            font-size: 24px;
+        }
+        label{
+            display: block;
+            margin-top: 16px;
+            margin-bottom: 6px;
+        }
+        input, select{
+            width: 100%;
+            box-sizing: border-box;
+            padding: 10px;
+            border: 1px solid #aaa;
+            border-radius: 4px;
+        }
+        button{
+            margin-top: 20px;
+            padding: 11px 16px;
+            width: 100%;
+            border: none;
+            border-radius: 4px;
+            background-color: #155e75;
+            color: white;
+            cursor: pointer;
+        }
+        .result{
+            margin-top: 20px;
+            padding: 12px;
+            border-radius: 4px;
+            display: none;
+        }
+        .success{
+            display: block;
+            background-color: #b4b8b2;
+            color: #176534;
+            border: 1px solid #83c995;
+            
+        }
+        .error{
+            display: block;
+            background-color: #fdeaea;
+            color: #a61b1b;
+            border: 1px solid #e4a0a0;
+        }
+    </style>
+</head>
+<body>
+    <main class="registration-card">
+        <h1>Mutungo Community workshop Registration</h1>
+        <form id="registration-form">
+            
+            <label for="name">Participant Name:</label>
+            <input type="text" id="ParticipantName" name="ParticipantName" required>
+
+            <label for="age">Age:</label>
+            <input type="number" id="age" name="age" min="0" step="1" required>
+
+            <label for="Workshop"> Select Workshop:</label>
+            <select name="workshop" id="workshop" id="" required>
+                <option value="">---select Workshop---</option>
+                <option value="WEB">WEB — Web Design </option>
+                <option value="DIG">DIG- Digital Literacy</option>
+                <option value="WELL">WELL- Not recognised</option>
+            </select>
+            <button type="submit">Register</button>
+        </form>
+        <div id="result" aria-live="polite"></div>
+    </main>
+    <script>
+        const lastdigit = 6
+        const RegistrationForm =document.getElementById("registration-form")
+        const result = document.getElementById("result")
+        RegistrationForm.addEventListener("submit", function(event){event.preventDefault()
+            const name = document.getElementById("ParticipantName").value.trim()
+            const ageText = document.getElementById("age").value.trim()
+            const age = Number(ageText)
+            const workshop = document.getElementById("workshop")
+            const workshopValue = workshop.value
+            // Clear contents of the previous results
+            result.textContent =""
+            result.className = ""
+
+            // setting Validation rules
+         if(name===""|| age ==="" || workshopValue===""){
+            showMessage("please put in all required fields.", "error")
+            return
+         }
+         if(!Number.isFinite(age)|| !Number.isInteger(age) || age<0){
+            showMessage("Invalid date, please enter a correct one", "error")
+            return
+        } 
+        // determining the base fee 
+        let basefee;
+        if(workshopValue==="WEB"){
+            basefee = 40000
+        }else if(workshopValue==="DIG"){
+            basefee = 25000
+        }else{
+            showMessage("Workshop code does not exist", "error");
+            return;
+        }
+        // determining the discount
+        const discountRate= lastdigit <= 4? 0.10:0.12
+        let discount = 0
+        if(age >= 18){
+            discount = basefee*discountRate
+        }
+        const totalfee= basefee - discount
+
+        showMessage(name + "    has registred Succefully for    "+ workshop.options[workshop.selectedIndex].text +
+        "  --Registration:  "+ formatUGX(basefee)+ 
+        "  --Discount applied:  "+ formatUGX(discount) +
+        "   --Total Registration fee:  " + formatUGX(totalfee), "success")
+        })
+        function formatUGX(amount){
+            return "UGX" + amount.toLocaleString("en-UG")
+        }
+        function showMessage(message, type){
+            result.textContent = message
+            result.className = type
+        }
+
+    </script>
+    
+</body>
+</html>
